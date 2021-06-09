@@ -867,6 +867,8 @@ ESP32_BOARD_PINS = {
     "xinabox_cw02": {"LED": 27},
 }
 
+STSTM32_BOARD_PINS = {"bluepill_f103c8_128k": {}}
+
 
 def _lookup_pin(value):
     if CORE.is_esp8266:
@@ -952,6 +954,8 @@ def validate_gpio_pin(value):
                 value,
             )
         return value
+    if CORE.is_ststm32:
+        return value
     raise NotImplementedError
 
 
@@ -988,6 +992,8 @@ def output_pin(value):
     if CORE.is_esp8266:
         if value == 17:
             raise cv.Invalid("GPIO17 (TOUT) is an analog-only pin on the ESP8266.")
+        return value
+    if CORE.is_ststm32:
         return value
     raise NotImplementedError
 
@@ -1041,12 +1047,22 @@ PIN_MODES_ESP32 = [
     "ANALOG",
 ]
 
+PIN_MODES_STSTM32 = [
+    "INPUT",
+    "OUTPUT",
+    "INPUT_PULLUP",
+    "OUTPUT_OPEN_DRAIN",
+    "ANALOG",
+]
+
 
 def pin_mode(value):
     if CORE.is_esp32:
         return cv.one_of(*PIN_MODES_ESP32, upper=True)(value)
     if CORE.is_esp8266:
         return cv.one_of(*PIN_MODES_ESP8266, upper=True)(value)
+    if CORE.is_ststm32:
+        return cv.one_of(*PIN_MODES_STSTM32, upper=True)(value)
     raise NotImplementedError
 
 

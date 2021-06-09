@@ -55,6 +55,8 @@ UART_SELECTION_ESP32 = ["UART0", "UART1", "UART2"]
 
 UART_SELECTION_ESP8266 = ["UART0", "UART0_SWAP", "UART1"]
 
+UART_SELECTION_STSTM32 = ["UART1", "UART2", "UART3"]
+
 HARDWARE_UART_TO_UART_SELECTION = {
     "UART0": logger_ns.UART_SELECTION_UART0,
     "UART0_SWAP": logger_ns.UART_SELECTION_UART0_SWAP,
@@ -77,6 +79,8 @@ def uart_selection(value):
         return cv.one_of(*UART_SELECTION_ESP32, upper=True)(value)
     if CORE.is_esp8266:
         return cv.one_of(*UART_SELECTION_ESP8266, upper=True)(value)
+    if CORE.is_ststm32:
+        return cv.one_of(*UART_SELECTION_STSTM32, upper=True)(value)
     raise NotImplementedError
 
 

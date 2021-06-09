@@ -145,6 +145,7 @@ class _Schema(vol.Schema):
                     # the value is invalid we immediately throw an exception.
                     exception_errors = []
                     try:
+                        print(f"Validating {key_path} as {value}")
                         cval = cvalue(key_path, value)
                         out[new_key] = cval
                     except vol.MultipleInvalid as e:

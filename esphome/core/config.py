@@ -53,6 +53,8 @@ def validate_board(value):
         board_pins = pins.ESP8266_BOARD_PINS
     elif CORE.is_esp32:
         board_pins = pins.ESP32_BOARD_PINS
+    elif CORE.is_ststm32:
+        board_pins = pins.STSTM32_BOARD_PINS
     else:
         raise NotImplementedError
 
@@ -118,6 +120,8 @@ def validate_arduino_version(value):
             )
         if value_ in PLATFORMIO_ESP32_LUT:
             return PLATFORMIO_ESP32_LUT[value_]
+        return value
+    if CORE.is_ststm32:
         return value
     raise NotImplementedError
 

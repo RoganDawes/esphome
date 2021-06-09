@@ -114,10 +114,9 @@ void ICACHE_RAM_ATTR HOT Application::feed_wdt() {
   static uint32_t LAST_FEED = 0;
   uint32_t now = millis();
   if (now - LAST_FEED > 3) {
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined(ARDUINO_ARCH_ESP8266)
     ESP.wdtFeed();
-#endif
-#ifdef ARDUINO_ARCH_ESP32
+#else
     yield();
 #endif
     LAST_FEED = now;

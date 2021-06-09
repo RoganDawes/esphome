@@ -587,6 +587,12 @@ class EsphomeCore:
             raise ValueError("No platform specified")
         return self.esp_platform == "ESP32"
 
+    @property
+    def is_ststm32(self):
+        if self.esp_platform is None:
+            raise ValueError("No platform specified")
+        return self.esp_platform == "STSTM32"
+
     def add_job(self, func, *args, **kwargs):
         self.event_loop.add_job(func, *args, **kwargs)
 
