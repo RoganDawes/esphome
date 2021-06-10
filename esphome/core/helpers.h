@@ -16,7 +16,9 @@
 #define ICACHE_RODATA_ATTR
 #endif
 
+#ifndef HOT
 #define HOT __attribute__((hot))
+#endif
 #define ESPDEPRECATED(msg) __attribute__((deprecated(msg)))
 #define ALWAYS_INLINE __attribute__((always_inline))
 #define PACKED __attribute__((packed))

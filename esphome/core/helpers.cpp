@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <algorithm>
 
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
-#else
+#elif defined ARDUINO_ARCH_ESP32
 #include <Esp.h>
 #endif
 
@@ -44,10 +44,12 @@ std::string get_mac_address_pretty() {
 std::string generate_hostname(const std::string &base) { return base + std::string("-") + get_mac_address(); }
 
 uint32_t random_uint32() {
-#ifdef ARDUINO_ARCH_ESP32
+#if defined ARDUINO_ARCH_ESP32
   return esp_random();
-#else
+#elif defined ARDUINO_ARCH_ESP8266
   return os_random();
+#else
+  return random();
 #endif
 }
 
@@ -105,7 +107,11 @@ std::string truncate_string(const std::string &s, size_t length) {
 }
 
 std::string value_accuracy_to_string(float value, int8_t accuracy_decimals) {
+#if defined ARDUINO_ARCH_STM32
+  auto multiplier = float(pow(10,accuracy_decimals));
+#else
   auto multiplier = float(pow10(accuracy_decimals));
+#endif
   float value_rounded = roundf(value * multiplier) / multiplier;
   char tmp[32];  // should be enough, but we should maybe improve this at some point.
   dtostrf(value_rounded, 0, uint8_t(std::max(0, int(accuracy_decimals))), tmp);

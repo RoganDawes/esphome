@@ -49,6 +49,10 @@ static bool DEFAULT_IN_FLASH = false;
 static bool DEFAULT_IN_FLASH = true;
 #endif
 
+#ifdef ARDUINO_ARCH_STM32
+static bool DEFAULT_IN_FLASH = false;
+#endif
+
 class ESPPreferences {
  public:
   ESPPreferences();

@@ -25,6 +25,7 @@ from esphome.const import (
     CONF_ESP8266_RESTORE_FROM_FLASH,
     ARDUINO_VERSION_ESP8266,
     ARDUINO_VERSION_ESP32,
+    ARDUINO_VERSION_STSTM32,
     ESP_PLATFORMS,
 )
 from esphome.core import CORE, coroutine_with_priority
@@ -91,6 +92,14 @@ PLATFORMIO_ESP32_LUT = {
     "DEV": ARDUINO_VERSION_ESP32["dev"],
 }
 
+PLATFORMIO_STSTM32_LUT = {
+    **ARDUINO_VERSION_STSTM32,
+    # See PLATFORMIO_ESP8266_LUT for considerations when changing the recommended version
+    "RECOMMENDED": ARDUINO_VERSION_STSTM32["14.0.0"],
+    "LATEST": "ststm32",
+    "DEV": ARDUINO_VERSION_STSTM32["dev"],
+}
+
 
 def validate_arduino_version(value):
     value = cv.string_strict(value)
@@ -122,6 +131,17 @@ def validate_arduino_version(value):
             return PLATFORMIO_ESP32_LUT[value_]
         return value
     if CORE.is_ststm32:
+        if (
+            VERSION_REGEX.match(value) is not None
+            and value_ not in PLATFORMIO_STSTM32_LUT
+        ):
+            raise cv.Invalid(
+                "Unfortunately the arduino framework version '{}' is unsupported "
+                "at this time. You can override this by manually using "
+                "ststm32@<platformio version>".format(value)
+            )
+        if value_ in PLATFORMIO_STSTM32_LUT:
+            return PLATFORMIO_STSTM32_LUT[value_]
         return value
     raise NotImplementedError
 
@@ -151,7 +171,9 @@ def valid_include(value):
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_NAME): cv.valid_name,
-        cv.Required(CONF_PLATFORM): cv.one_of("ESP8266", "ESP32", upper=True),
+        cv.Required(CONF_PLATFORM): cv.one_of(
+            "ESP8266", "ESP32", "STSTM32", upper=True
+        ),
         cv.Required(CONF_BOARD): validate_board,
         cv.Optional(CONF_COMMENT): cv.string,
         cv.Optional(
@@ -330,6 +352,18 @@ async def to_code(config):
     cg.add_build_flag("-Wno-unused-variable")
     cg.add_build_flag("-Wno-unused-but-set-variable")
     cg.add_build_flag("-Wno-sign-compare")
+
+    if CORE.is_ststm32:
+        cg.add_build_flag("-DPIO_FRAMEWORK_ARDUINO_ENABLE_CDC")
+        cg.add_build_flag("-DUSBCON")
+        cg.add_build_flag("-DUSBD_VID=0x0483")
+        cg.add_build_flag("-DUSBD_PID=0x5740")
+        cg.add_build_flag('-DUSB_MANUFACTURER="Unknown"')
+        cg.add_build_flag('-DUSB_PRODUCT="BLUEPILL_F103C8"')
+        cg.add_build_flag("-DHAL_PCD_MODULE_ENABLED")
+        cg.add_build_flag("-DICACHE_RAM_ATTR=")
+        cg.add_build_flag("-DHOT=")
+
     if config.get(CONF_ESP8266_RESTORE_FROM_FLASH, False):
         cg.add_define("USE_ESP8266_PREFERENCES_FLASH")
 

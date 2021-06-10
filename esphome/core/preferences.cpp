@@ -226,6 +226,23 @@ void ESPPreferences::prevent_write(bool prevent) { this->prevent_write_ = preven
 bool ESPPreferences::is_prevent_write() { return this->prevent_write_; }
 #endif
 
+#ifdef ARDUINO_ARCH_STM32
+ESPPreferences::ESPPreferences() : current_offset_(0) {}
+void ESPPreferences::begin() {
+}
+bool ESPPreferenceObject::save_internal_() {
+  return false;
+}
+bool ESPPreferenceObject::load_internal_() {
+  return false;
+}
+ESPPreferenceObject ESPPreferences::make_preference(size_t length, uint32_t type, bool in_flash) {
+  auto pref = ESPPreferenceObject(this->current_offset_, length, type);
+  this->current_offset_++;
+  return pref;
+}
+#endif
+
 #ifdef ARDUINO_ARCH_ESP32
 bool ESPPreferenceObject::save_internal_() {
   if (global_preferences.nvs_handle_ == 0)

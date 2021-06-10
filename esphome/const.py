@@ -45,6 +45,10 @@ ARDUINO_VERSION_ESP8266 = {
     "2.4.0": "platformio/espressif8266@1.6.0",
     "2.3.0": "platformio/espressif8266@1.5.0",
 }
+ARDUINO_VERSION_STSTM32 = {
+    "dev": "https://github.com/platformio/platform-ststm32.git",
+    "14.0.0": "platformio/ststm32@14.0.0",
+}
 SOURCE_FILE_EXTENSIONS = {".cpp", ".hpp", ".h", ".c", ".tcc", ".ino"}
 HEADER_FILE_EXTENSIONS = {".h", ".hpp", ".tcc"}
 
