@@ -6,7 +6,7 @@
 namespace esphome {
 namespace remote_receiver {
 
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined ARDUINO_ARCH_ESP8266 || defined ARDUINO_ARCH_STM32
 struct RemoteReceiverComponentStore {
   static void gpio_intr(RemoteReceiverComponentStore *arg);
 
@@ -55,7 +55,7 @@ class RemoteReceiverComponent : public remote_base::RemoteReceiverBase,
   esp_err_t error_code_{ESP_OK};
 #endif
 
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined ARDUINO_ARCH_ESP8266 || defined ARDUINO_ARCH_STM32
   RemoteReceiverComponentStore store_;
   HighFrequencyLoopRequester high_freq_;
 #endif

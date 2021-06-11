@@ -2,7 +2,7 @@
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_STM32
 
 namespace esphome {
 namespace remote_receiver {
