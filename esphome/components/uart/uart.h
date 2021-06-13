@@ -3,6 +3,7 @@
 #include <HardwareSerial.h>
 #include "esphome/core/esphal.h"
 #include "esphome/core/component.h"
+#include <vector>
 
 namespace esphome {
 namespace uart {
