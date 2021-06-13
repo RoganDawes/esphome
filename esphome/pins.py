@@ -867,7 +867,64 @@ ESP32_BOARD_PINS = {
     "xinabox_cw02": {"LED": 27},
 }
 
-STSTM32_BOARD_PINS = {"bluepill_f103c8_128k": {}}
+STSTM32_BASE_PINS = {}
+
+
+STSTM32_BOARD_PINS = {
+    "bluepill_f103c8_128k": {
+        # Left side
+        "PB_9": 0,
+        "PB_8": 1,
+        "PB_7": 2,
+        "PB_6": 3,
+        "PB_5": 4,
+        "PB_4": 5,
+        "PB_3": 6,
+        "PA_15": 7,
+        "PA_12": 8,
+        "PA_11": 9,
+        "PA_10": 10,
+        "PA_9": 11,
+        "PA_8": 12,
+        "PB_15": 13,
+        "PB_14": 14,
+        "PB_13": 15,
+        "PB_12": 16,
+        # Right side
+        "PC_13": 17,
+        "LED_BUILTIN": 17,
+        "PC_14": 18,
+        "PC_15": 19,
+        "PA_0": 20,
+        "A_0": 20,
+        "PA_1": 21,
+        "A_1": 21,
+        "PA_2": 22,
+        "A_2": 22,
+        "PA_3": 23,
+        "A_3": 23,
+        "PA_4": 24,
+        "A_4": 24,
+        "PA_5": 25,
+        "A_5": 25,
+        "PA_6": 26,
+        "A_6": 26,
+        "PA_7": 27,
+        "A_7": 27,
+        "PB_0": 28,
+        "A_8": 28,
+        "PB_1": 29,
+        "A_9": 29,
+        "PB_10": 30,
+        "PB_11": 31,
+        "PB_2": 32,
+        "BOOT1": 32,
+        "PA_13": 33,
+        "SWDIO": 33,
+        "PA_14": 34,
+        "SWCLK": 34,
+    }
+}
 
 
 def _lookup_pin(value):
@@ -877,6 +934,9 @@ def _lookup_pin(value):
     elif CORE.is_esp32:
         board_pins_dict = ESP32_BOARD_PINS
         base_pins = ESP32_BASE_PINS
+    elif CORE.is_ststm32:
+        board_pins_dict = STSTM32_BOARD_PINS
+        base_pins = STSTM32_BASE_PINS
     else:
         raise NotImplementedError
 
