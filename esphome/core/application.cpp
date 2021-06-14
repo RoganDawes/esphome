@@ -133,6 +133,8 @@ void Application::reboot() {
     comp->on_shutdown();
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
   ESP.restart();
+#elif defined ARDUINO_ARCH_STM32
+  NVIC_SystemReset();
 #endif
   // restart() doesn't always end execution
   while (true) {
