@@ -247,6 +247,7 @@ class Nameable {
   explicit Nameable(const std::string &name);
   const std::string &get_name() const;
   void set_name(const std::string &name);
+  void set_object_id(const std::string &id);
   /// Get the sanitized name of this nameable as an ID. Caching it internally.
   const std::string &get_object_id();
   uint32_t get_object_id_hash();
@@ -256,8 +257,6 @@ class Nameable {
 
  protected:
   virtual uint32_t hash_base() = 0;
-
-  void calc_object_id_();
 
   std::string name_;
   std::string object_id_;
