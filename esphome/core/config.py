@@ -363,6 +363,7 @@ async def to_code(config):
         cg.add_build_flag("-DHAL_PCD_MODULE_ENABLED")
         cg.add_build_flag("-DICACHE_RAM_ATTR=")
         cg.add_build_flag("-DHOT=")
+        cg.add_build_flag("-DENABLE_HWSERIAL1")
 
     if config.get(CONF_ESP8266_RESTORE_FROM_FLASH, False):
         cg.add_define("USE_ESP8266_PREFERENCES_FLASH")
