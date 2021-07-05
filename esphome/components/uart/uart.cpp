@@ -31,7 +31,7 @@ int UARTComponent::peek() {
 }
 
 void UARTComponent::check_logger_conflict_() {
-#ifdef USE_LOGGER
+#if defined USE_LOGGER
   if (this->hw_serial_ == nullptr || logger::global_logger->get_baud_rate() == 0) {
     return;
   }

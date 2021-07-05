@@ -101,8 +101,14 @@ void HOT Logger::log_message_(int level, const char *tag, int offset) {
   this->set_null_terminator_();
 
   const char *msg = this->tx_buffer_ + offset;
-  if (this->baud_rate_ > 0)
-    this->hw_serial_->println(msg);
+  if (this->baud_rate_ > 0) {
+#if defined USBCON
+    if (this->usb_serial_ != nullptr)
+      this->usb_serial_->println(msg);
+#endif
+    if (this->hw_serial_ != nullptr)
+      this->hw_serial_->println(msg);
+  }
 #ifdef ARDUINO_ARCH_ESP32
   // Suppress network-logging if memory constrained, but still log to serial
   // ports. In some configurations (eg BLE enabled) there may be some transient
@@ -125,7 +131,7 @@ Logger::Logger(uint32_t baud_rate, size_t tx_buffer_size, UARTSelection uart)
 void Logger::pre_setup() {
   if (this->baud_rate_ > 0) {
     switch (this->uart_) {
-#if ! defined ARDUINO_ARCH_STM32
+#if defined ARDUINO_ARCH_ESP8266 || defined ARDUINO_ARCH_ESP32
       case UART_SELECTION_UART0:
 #ifdef ARDUINO_ARCH_ESP8266
       case UART_SELECTION_UART0_SWAP:
@@ -145,15 +151,22 @@ void Logger::pre_setup() {
 #endif
         break;
 #endif
+#if defined USBCON
+      case UART_SELECTION_USB:
+        this->usb_serial_ = &Serial;
+        break;
+#endif
     }
 
-    this->hw_serial_->begin(this->baud_rate_);
+    if (this->hw_serial_ != nullptr) {
+      this->hw_serial_->begin(this->baud_rate_);
 #ifdef ARDUINO_ARCH_ESP8266
-    if (this->uart_ == UART_SELECTION_UART0_SWAP) {
-      this->hw_serial_->swap();
-    }
-    this->hw_serial_->setDebugOutput(ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERBOSE);
+      if (this->uart_ == UART_SELECTION_UART0_SWAP) {
+        this->hw_serial_->swap();
+      }
+      this->hw_serial_->setDebugOutput(ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERBOSE);
 #endif
+    }
   }
 #ifdef ARDUINO_ARCH_ESP8266
   else {

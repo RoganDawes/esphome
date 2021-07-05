@@ -55,13 +55,15 @@ UART_SELECTION_ESP32 = ["UART0", "UART1", "UART2"]
 
 UART_SELECTION_ESP8266 = ["UART0", "UART0_SWAP", "UART1"]
 
-UART_SELECTION_STSTM32 = ["UART1", "UART2", "UART3"]
+UART_SELECTION_STSTM32 = ["USB", "UART1", "UART2", "UART3"]
 
 HARDWARE_UART_TO_UART_SELECTION = {
     "UART0": logger_ns.UART_SELECTION_UART0,
     "UART0_SWAP": logger_ns.UART_SELECTION_UART0_SWAP,
     "UART1": logger_ns.UART_SELECTION_UART1,
     "UART2": logger_ns.UART_SELECTION_UART2,
+    "UART3": logger_ns.UART_SELECTION_UART3,
+    "USB": logger_ns.UART_SELECTION_USB,
 }
 
 HARDWARE_UART_TO_SERIAL = {
@@ -69,6 +71,8 @@ HARDWARE_UART_TO_SERIAL = {
     "UART0_SWAP": cg.global_ns.Serial,
     "UART1": cg.global_ns.Serial1,
     "UART2": cg.global_ns.Serial2,
+    "UART3": cg.global_ns.Serial3,
+    "USB": cg.global_ns.Serial,
 }
 
 is_log_level = cv.one_of(*LOG_LEVELS, upper=True)

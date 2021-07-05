@@ -18,10 +18,14 @@ enum UARTSelection {
   UART_SELECTION_UART0 = 0,
   UART_SELECTION_UART1,
 #ifdef ARDUINO_ARCH_ESP32
-  UART_SELECTION_UART2
+  UART_SELECTION_UART2,
 #endif
 #ifdef ARDUINO_ARCH_ESP8266
-      UART_SELECTION_UART0_SWAP
+      UART_SELECTION_UART0_SWAP,
+#endif
+#ifdef ARDUINO_ARCH_STM32
+      UART_SELECTION_UART3,
+      UART_SELECTION_USB,
 #endif
 };
 
@@ -107,6 +111,9 @@ class Logger : public Component {
   int tx_buffer_size_{0};
   UARTSelection uart_{UART_SELECTION_UART0};
   HardwareSerial *hw_serial_{nullptr};
+#if defined USBCON
+  USBSerial *usb_serial_{nullptr};
+#endif
   struct LogLevelOverride {
     std::string tag;
     int level;

@@ -107,6 +107,9 @@ class UARTComponent : public Component, public Stream {
 #ifdef ARDUINO_ARCH_ESP8266
   ESP8266SoftwareSerial *sw_serial_{nullptr};
 #endif
+#ifdef ARDUINO_ARCH_STM32
+  USBSerial *usb_serial_{nullptr};
+#endif
   optional<uint8_t> tx_pin_;
   optional<uint8_t> rx_pin_;
   size_t rx_buffer_size_;

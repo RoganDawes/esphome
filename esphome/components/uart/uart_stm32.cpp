@@ -1,4 +1,5 @@
 #if defined ARDUINO_ARCH_STM32
+#include "Arduino.h"
 #include "uart.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
@@ -8,9 +9,6 @@
 namespace esphome {
 namespace uart {
 static const char *TAG = "uart_stm32";
-
-HardwareSerial Serial2(PA3, PA2);
-HardwareSerial Serial3(PB11, PB10);
 
 uint32_t UARTComponent::get_config() {
   /*
@@ -48,27 +46,18 @@ void UARTComponent::setup() {
   // preconfigured by the platform. For example if RX disabled but TX pin
   // is 1 we still want to use Serial.
   // FIXME: Deal with the case where USB Serial is not enabled?
-  if (this->tx_pin_.value_or(PA_9) == PA_9 && this->rx_pin_.value_or(PA_10) == PA_10) {
-    ESP_LOGCONFIG(TAG, "Using Serial1");
-    this->hw_serial_ = &Serial1;
-  } else if (this->tx_pin_.value_or(PA_2) == 22 && this->rx_pin_.value_or(PA_3) == 23) {
-    ESP_LOGCONFIG(TAG, "Using Serial2");
-    this->hw_serial_ = &Serial2;
-  } else if (this->tx_pin_.value_or(PB_10) == PB_10 && this->rx_pin_.value_or(PB_10) == PB_10) {
-    ESP_LOGCONFIG(TAG, "Using Serial3");
-    this->hw_serial_ = &Serial3;
-  } else {
-    ESP_LOGCONFIG(TAG, "Invalid UART parameters! TX=%d, RX=%d, expected %d/%d", this->tx_pin_.value_or(PA_2), this->rx_pin_.value_or(PA_3), PA_2, PA_3);
-    return;
-  }
   int8_t tx = this->tx_pin_.has_value() ? *this->tx_pin_ : -1;
   int8_t rx = this->rx_pin_.has_value() ? *this->rx_pin_ : -1;
-  this->hw_serial_->begin(this->baud_rate_, get_config());
-  // FIXME: We should be able to handle alternate functions
-  // this->hw_serial_->setTx(tx);
-  // this->hw_serial_->setRx(rx);
-  // FIXME: This is not supported in STM32. Should alert if set to non-default
-  // Actually, it can be defined using a build-time flag:
+  if (tx == 0 && rx == 0) {
+    this->usb_serial_ = &Serial;
+  } else {
+    this->hw_serial_ = new HardwareSerial(rx , tx);
+    this->hw_serial_->begin(this->baud_rate_, get_config());
+  }
+  // Define alternate pins if needed according to:
+  // https://github.com/stm32duino/wiki/wiki/API#hardwareserial
+  //
+  // Receive buffer can be defined using a build-time flag:
   // build_flags = -D SERIAL_RX_BUFFER_SIZE=256
   // this->hw_serial_->setRxBufferSize(this->rx_buffer_size_);
   ESP_LOGCONFIG(TAG, "Done setting up UART...");
@@ -91,36 +80,67 @@ void UARTComponent::dump_config() {
 }
 
 void UARTComponent::write_byte(uint8_t data) {
-  this->hw_serial_->write(data);
+  if (this->hw_serial_ != nullptr)
+    this->hw_serial_->write(data);
+  else if (this->usb_serial_ != nullptr)
+    this->usb_serial_->write(data);
+  else
+    return;
   ESP_LOGVV(TAG, "    Wrote 0b" BYTE_TO_BINARY_PATTERN " (0x%02X)", BYTE_TO_BINARY(data), data);
 }
 void UARTComponent::write_array(const uint8_t *data, size_t len) {
-  this->hw_serial_->write(data, len);
+  if (this->hw_serial_ != nullptr)
+    this->hw_serial_->write(data, len);
+  else if (this->usb_serial_ != nullptr)
+    this->usb_serial_->write(data, len);
+  else
+    return;
   for (size_t i = 0; i < len; i++) {
     ESP_LOGVV(TAG, "    Wrote 0b" BYTE_TO_BINARY_PATTERN " (0x%02X)", BYTE_TO_BINARY(data[i]), data[i]);
   }
 }
 void UARTComponent::write_str(const char *str) {
-  this->hw_serial_->write(str);
+  Serial.print("in write_str ["); Serial.print(str); Serial.println("]");
+  if (this->hw_serial_ != nullptr)
+    this->hw_serial_->write(str);
+  else if (this->usb_serial_ != nullptr)
+    this->usb_serial_->write(str);
+  else
+    return;
   ESP_LOGVV(TAG, "    Wrote \"%s\"", str);
 }
 bool UARTComponent::read_byte(uint8_t *data) {
   if (!this->check_read_timeout_())
     return false;
-  *data = this->hw_serial_->read();
+  if (this->hw_serial_ != nullptr)
+    *data = this->hw_serial_->read();
+  else if (this->usb_serial_ != nullptr)
+    *data = this->usb_serial_->read();
+  else
+    return false;
   ESP_LOGVV(TAG, "    Read 0b" BYTE_TO_BINARY_PATTERN " (0x%02X)", BYTE_TO_BINARY(*data), *data);
   return true;
 }
 bool UARTComponent::peek_byte(uint8_t *data) {
   if (!this->check_read_timeout_())
     return false;
-  *data = this->hw_serial_->peek();
+  if (this->hw_serial_ != nullptr)
+    *data = this->hw_serial_->peek();
+  else if (this->usb_serial_ != nullptr)
+    *data = this->usb_serial_->peek();
+  else
+    return false;
   return true;
 }
 bool UARTComponent::read_array(uint8_t *data, size_t len) {
   if (!this->check_read_timeout_(len))
     return false;
-  this->hw_serial_->readBytes(data, len);
+  if (this->hw_serial_ != nullptr)
+    this->hw_serial_->readBytes(data, len);
+  else if (this->usb_serial_ != nullptr)
+    this->usb_serial_->readBytes((char *)data, len);
+  else
+    return false;
   for (size_t i = 0; i < len; i++) {
     ESP_LOGVV(TAG, "    Read 0b" BYTE_TO_BINARY_PATTERN " (0x%02X)", BYTE_TO_BINARY(data[i]), data[i]);
   }
@@ -141,10 +161,22 @@ bool UARTComponent::check_read_timeout_(size_t len) {
   }
   return true;
 }
-int UARTComponent::available() { return this->hw_serial_->available(); }
+int UARTComponent::available() { 
+  if (this->hw_serial_ != nullptr)
+    return this->hw_serial_->available();
+  else if (this->usb_serial_ != nullptr)
+    return this->usb_serial_->available();
+  else
+    return false;
+}
 void UARTComponent::flush() {
+  if (this->hw_serial_ != nullptr)
+    this->hw_serial_->flush();
+  else if (this->usb_serial_ != nullptr)
+    this->usb_serial_->flush();
+  else
+    return;
   ESP_LOGVV(TAG, "    Flushing...");
-  this->hw_serial_->flush();
 }
 
 }  // namespace uart
