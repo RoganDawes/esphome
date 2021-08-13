@@ -1,5 +1,5 @@
 // This file was automatically generated with a tool.
-// See scripts/api_protobuf/api_protobuf.py
+// See script/api_protobuf/api_protobuf.py
 #include "api_pb2_service.h"
 #include "esphome/core/log.h"
 
@@ -64,8 +64,6 @@ bool APIServerConnectionBase::send_cover_state_response(const CoverStateResponse
   return this->send_message_<CoverStateResponse>(msg, 22);
 }
 #endif
-#ifdef USE_COVER
-#endif
 #ifdef USE_FAN
 bool APIServerConnectionBase::send_list_entities_fan_response(const ListEntitiesFanResponse &msg) {
   ESP_LOGVV(TAG, "send_list_entities_fan_response: %s", msg.dump().c_str());
@@ -78,8 +76,6 @@ bool APIServerConnectionBase::send_fan_state_response(const FanStateResponse &ms
   return this->send_message_<FanStateResponse>(msg, 23);
 }
 #endif
-#ifdef USE_FAN
-#endif
 #ifdef USE_LIGHT
 bool APIServerConnectionBase::send_list_entities_light_response(const ListEntitiesLightResponse &msg) {
   ESP_LOGVV(TAG, "send_list_entities_light_response: %s", msg.dump().c_str());
@@ -91,8 +87,6 @@ bool APIServerConnectionBase::send_light_state_response(const LightStateResponse
   ESP_LOGVV(TAG, "send_light_state_response: %s", msg.dump().c_str());
   return this->send_message_<LightStateResponse>(msg, 24);
 }
-#endif
-#ifdef USE_LIGHT
 #endif
 #ifdef USE_SENSOR
 bool APIServerConnectionBase::send_list_entities_sensor_response(const ListEntitiesSensorResponse &msg) {
@@ -118,8 +112,6 @@ bool APIServerConnectionBase::send_switch_state_response(const SwitchStateRespon
   return this->send_message_<SwitchStateResponse>(msg, 26);
 }
 #endif
-#ifdef USE_SWITCH
-#endif
 #ifdef USE_TEXT_SENSOR
 bool APIServerConnectionBase::send_list_entities_text_sensor_response(const ListEntitiesTextSensorResponse &msg) {
   ESP_LOGVV(TAG, "send_list_entities_text_sensor_response: %s", msg.dump().c_str());
@@ -139,8 +131,7 @@ bool APIServerConnectionBase::send_homeassistant_service_response(const Homeassi
   ESP_LOGVV(TAG, "send_homeassistant_service_response: %s", msg.dump().c_str());
   return this->send_message_<HomeassistantServiceResponse>(msg, 35);
 }
-bool APIServerConnectionBase::send_subscribe_home_assistant_state_response(
-    const SubscribeHomeAssistantStateResponse &msg) {
+bool APIServerConnectionBase::send_subscribe_home_assistant_state_response(const SubscribeHomeAssistantStateResponse &msg) {
   ESP_LOGVV(TAG, "send_subscribe_home_assistant_state_response: %s", msg.dump().c_str());
   return this->send_message_<SubscribeHomeAssistantStateResponse>(msg, 39);
 }
@@ -168,8 +159,6 @@ bool APIServerConnectionBase::send_camera_image_response(const CameraImageRespon
   return this->send_message_<CameraImageResponse>(msg, 44);
 }
 #endif
-#ifdef USE_ESP32_CAMERA
-#endif
 #ifdef USE_CLIMATE
 bool APIServerConnectionBase::send_list_entities_climate_response(const ListEntitiesClimateResponse &msg) {
   ESP_LOGVV(TAG, "send_list_entities_climate_response: %s", msg.dump().c_str());
@@ -181,8 +170,6 @@ bool APIServerConnectionBase::send_climate_state_response(const ClimateStateResp
   ESP_LOGVV(TAG, "send_climate_state_response: %s", msg.dump().c_str());
   return this->send_message_<ClimateStateResponse>(msg, 47);
 }
-#endif
-#ifdef USE_CLIMATE
 #endif
 bool APIServerConnectionBase::read_message(uint32_t msg_size, uint32_t msg_type, uint8_t *msg_data) {
   switch (msg_type) {
@@ -425,8 +412,7 @@ void APIServerConnection::on_subscribe_logs_request(const SubscribeLogsRequest &
   }
   this->subscribe_logs(msg);
 }
-void APIServerConnection::on_subscribe_homeassistant_services_request(
-    const SubscribeHomeassistantServicesRequest &msg) {
+void APIServerConnection::on_subscribe_homeassistant_services_request(const SubscribeHomeassistantServicesRequest &msg) {
   if (!this->is_connection_setup()) {
     this->on_no_setup_connection();
     return;
