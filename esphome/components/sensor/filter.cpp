@@ -237,7 +237,11 @@ optional<float> FilterOutValueFilter::new_value(float value) {
       return value;
   } else {
     int8_t accuracy = this->parent_->get_accuracy_decimals();
+#if defined ARDUINO_ARCH_STM32
+    float accuracy_mult = powf(10,accuracy);
+#else
     float accuracy_mult = pow10f(accuracy);
+#endif
     float rounded_filter_out = roundf(accuracy_mult * this->value_to_filter_out_);
     float rounded_value = roundf(accuracy_mult * value);
     if (rounded_filter_out == rounded_value)
