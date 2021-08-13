@@ -11,7 +11,7 @@ from google.protobuf import message  # noqa
 
 from esphome import const
 import esphome.api.api_pb2 as pb
-from esphome.const import CONF_PASSWORD, CONF_PORT
+from esphome.const import CONF_PASSWORD, CONF_PORT, CONF_LEVEL
 from esphome.core import EsphomeError
 from esphome.helpers import resolve_ip_address, indent
 from esphome.log import color, Fore
@@ -435,6 +435,8 @@ def run_logs(config, address):
     conf = config["api"]
     port = conf[CONF_PORT]
     password = conf[CONF_PASSWORD]
+    logger = config["logger"]
+    level = pb.LogLevel.Value(logger[CONF_LEVEL])
     _LOGGER.info("Starting log output from %s using esphome API", address)
 
     cli = APIClient(address, port, password)
@@ -497,7 +499,7 @@ def run_logs(config, address):
 
     def on_login():
         try:
-            cli.subscribe_logs(on_log, dump_config=not has_connects)
+            cli.subscribe_logs(on_log, log_level=level, dump_config=not has_connects)
             has_connects.append(True)
         except APIConnectionError:
             cli.disconnect()
