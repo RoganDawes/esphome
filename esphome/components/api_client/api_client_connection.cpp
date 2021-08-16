@@ -103,7 +103,7 @@ bool APIClientConnection::send_buffer(ProtoWriteBuffer buffer, uint32_t message_
 
   return this->send_buffer(header, buffer);
 }
-
+float APIClientConnection::get_setup_priority() const { return setup_priority::PROCESSOR; }
 void APIClientConnection::loop() {
   this->parse_recv_buffer_();
 
@@ -370,8 +370,7 @@ void APIClientConnection::on_climate_state_response(const ClimateStateResponse &
 }
 #endif
 
-StreamAPIClientConnection::StreamAPIClientConnection(Stream *stream)
-    :  client_(stream) {}
+StreamAPIClientConnection::StreamAPIClientConnection() {}
 StreamAPIClientConnection::~StreamAPIClientConnection() {}
 void StreamAPIClientConnection::loop() {
   size_t available = this->client_->available();
@@ -411,24 +410,26 @@ void StreamAPIClientConnection::on_fatal_error(){
   this->connection_state_ = ConnectionState::WAITING_FOR_HELLO;
 
   this->last_traffic_ = millis();
+  this->sent_ping_ = false;
   this->recv_buffer_.clear();
-  this->set_timeout("retry", 5000, [this]() { 
+  this->set_timeout("retry", 15000, [this]() {
     HelloRequest req;
     req.client_info = App.get_name();
     this->send_hello_request(req);
   });
 }
 void StreamAPIClientConnection::disconnect_client(){
-    this->send_ping_request(PingRequest());
-    // ESP_LOGE(TAG, "Disconnecting client, will retry");
-    // this->last_traffic_ = millis();
-    // this->recv_buffer_.clear();
-    // this->sent_ping_ = false;
-    // this->set_timeout("retry", 15000, [this]() { 
-    //     HelloRequest req;
-    //     req.client_info = App.get_name();
-    //     this->send_hello_request(req);
-    // });
+    ESP_LOGE(TAG, "Disconnecting client, will retry");
+    this->connection_state_ = ConnectionState::WAITING_FOR_HELLO;
+
+    this->last_traffic_ = millis();
+    this->sent_ping_ = false;
+    this->recv_buffer_.clear();
+    this->set_timeout("retry", 5000, [this]() {
+        HelloRequest req;
+        req.client_info = App.get_name();
+        this->send_hello_request(req);
+    });
 }
 
 }  // namespace api

@@ -17,6 +17,7 @@ class APIClientConnection : public APIClientConnectionBase, public Component {
 
   virtual void disconnect_client() = 0;
   void setup();
+  float get_setup_priority() const override;
   virtual void loop();
   virtual size_t space() = 0;
 
@@ -114,7 +115,7 @@ class APIClientConnection : public APIClientConnectionBase, public Component {
 
 class StreamAPIClientConnection : public APIClientConnection {
  public:
-  StreamAPIClientConnection(Stream *client);
+  StreamAPIClientConnection();
   virtual ~StreamAPIClientConnection();
   void on_disconnect_response(const DisconnectResponse &value) override {
     // just reset connection_state_
@@ -127,6 +128,16 @@ class StreamAPIClientConnection : public APIClientConnection {
     return resp;
   }
   bool send_buffer(std::vector<uint8_t> header, ProtoWriteBuffer buffer) override;
+  void set_password(std::string password) {
+    this->password_ = password;
+    if (password == "") {
+      this->authenticated_ = true;
+      this->connected_ = true;
+    }
+  }
+  void set_stream(Stream *stream) {
+    this->client_ = stream;
+  }
   void on_fatal_error() override;
 
   void disconnect_client() override;
