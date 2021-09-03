@@ -201,7 +201,7 @@ const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART2"};
 const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART0_SWAP"};
 #endif
 #ifdef ARDUINO_ARCH_STM32
-const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART2"};
+const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART2", "USB"};
 #endif
 void Logger::dump_config() {
   ESP_LOGCONFIG(TAG, "Logger:");

@@ -56,7 +56,7 @@ UART_SELECTION_ESP32 = ["UART0", "UART1", "UART2"]
 
 UART_SELECTION_ESP8266 = ["UART0", "UART0_SWAP", "UART1"]
 
-UART_SELECTION_STSTM32 = ["USB", "UART1", "UART2", "UART3"]
+UART_SELECTION_STSTM32 = ["UART1", "UART2", "UART3", "USB"]
 
 HARDWARE_UART_TO_UART_SELECTION = {
     "UART0": logger_ns.UART_SELECTION_UART0,
@@ -223,7 +223,7 @@ def validate_printf(value):
     (?:\.(?:\d+|\*))?                  # precision
     (?:h|l|ll|w|I|I32|I64)?            # size
     [cCdiouxXeEfgGaAnpsSZ]             # type
-    ) 
+    )
     """  # noqa
     matches = re.findall(cfmt, value[CONF_FORMAT], flags=re.X)
     if len(matches) != len(value[CONF_ARGS]):
