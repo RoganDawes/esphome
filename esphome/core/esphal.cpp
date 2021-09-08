@@ -1,3 +1,4 @@
+#if defined ARDUINO_ARCH_ESP8266 || defined ARDUINO_ARCH_ESP32
 #include "esphome/core/esphal.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/defines.h"
@@ -33,14 +34,11 @@ GPIOPin::GPIOPin(uint8_t pin, uint8_t mode, bool inverted)
       gpio_clear_(&GPIO.out_w1tc.val),
       gpio_read_(&GPIO.in.val),
 #else
-          gpio_set_(pin < 32 ? &GPIO.out_w1ts : &GPIO.out1_w1ts.val),
+      gpio_set_(pin < 32 ? &GPIO.out_w1ts : &GPIO.out1_w1ts.val),
       gpio_clear_(pin < 32 ? &GPIO.out_w1tc : &GPIO.out1_w1tc.val),
       gpio_read_(pin < 32 ? &GPIO.in : &GPIO.in1.val),
 #endif
       gpio_mask_(pin < 32 ? (1UL << pin) : (1UL << (pin - 32)))
-#elif ARDUINO_ARCH_STM32
-      gpio_read_(0),
-      gpio_mask_(0)
 #endif
 {
 }
@@ -60,7 +58,6 @@ const char *GPIOPin::get_pin_mode_name() const {
     case OUTPUT_OPEN_DRAIN:
       mode_s = "OUTPUT_OPEN_DRAIN";
       break;
-#if ! defined ARDUINO_ARCH_STM32
     case SPECIAL:
       mode_s = "SPECIAL";
       break;
@@ -76,7 +73,6 @@ const char *GPIOPin::get_pin_mode_name() const {
     case FUNCTION_4:
       mode_s = "FUNCTION_4";
       break;
-#endif
 
 #ifdef ARDUINO_ARCH_ESP32
     case PULLUP:
@@ -130,18 +126,10 @@ unsigned char GPIOPin::get_mode() const { return this->mode_; }
 bool GPIOPin::is_inverted() const { return this->inverted_; }
 void GPIOPin::setup() { this->pin_mode(this->mode_); }
 bool ICACHE_RAM_ATTR HOT GPIOPin::digital_read() {
-#if defined ARDUINO_ARCH_STM32
-  return digitalRead(this->pin_) != this->inverted_;
-#else
   return bool((*this->gpio_read_) & this->gpio_mask_) != this->inverted_;
-#endif
 }
 bool ICACHE_RAM_ATTR HOT ISRInternalGPIOPin::digital_read() {
-#if defined ARDUINO_ARCH_STM32
-  return digitalRead(this->pin_) != this->inverted_;
-#else
   return bool((*this->gpio_read_) & this->gpio_mask_) != this->inverted_;
-#endif
 }
 void ICACHE_RAM_ATTR HOT GPIOPin::digital_write(bool value) {
 #ifdef ARDUINO_ARCH_ESP8266
@@ -166,13 +154,6 @@ void ICACHE_RAM_ATTR HOT GPIOPin::digital_write(bool value) {
     (*this->gpio_clear_) = this->gpio_mask_;
   }
 #endif
-#if defined ARDUINO_ARCH_STM32
-  if (value != this->inverted_) {
-    digitalWrite(this->pin_, HIGH);
-  } else {
-    digitalWrite(this->pin_, LOW);
-  }
-#endif
 }
 void ICACHE_RAM_ATTR HOT ISRInternalGPIOPin::digital_write(bool value) {
 #ifdef ARDUINO_ARCH_ESP8266
@@ -195,11 +176,6 @@ void ICACHE_RAM_ATTR HOT ISRInternalGPIOPin::digital_write(bool value) {
     (*this->gpio_set_) = this->gpio_mask_;
   } else {
     (*this->gpio_clear_) = this->gpio_mask_;
-  }
-#endif
-#if defined (ARDUINO_ARCH_STM32)
-  if (value != this->inverted_) {
-    digitalWrite(this->pin_, !this->inverted_);
   }
 #endif
 }
@@ -266,7 +242,7 @@ void GPIOPin::detach_interrupt_() const {
 #ifdef ARDUINO_ARCH_ESP8266
   __detachInterrupt(get_pin());
 #endif
-#if defined ARDUINO_ARCH_ESP32 || defined ARDUINO_ARCH_STM32
+#ifdef ARDUINO_ARCH_ESP32
   detachInterrupt(get_pin());
 #endif
 }
@@ -294,9 +270,6 @@ void GPIOPin::attach_interrupt_(void (*func)(void *), void *arg, int mode) const
   // yet again proves how horrible code is there :( - how could that have been accepted...
   auto *attach = reinterpret_cast<void (*)(uint8_t, void (*)(void *), void *, int)>(attachInterruptArg);
   attach(this->pin_, func, arg, mode);
-#endif
-#if defined ARDUINO_ARCH_STM32
-  attachInterrupt(digitalPinToInterrupt(this->pin_), std::bind(func, arg), mode);
 #endif
 }
 
@@ -352,3 +325,4 @@ extern void resetPins() {  // NOLINT
 }
 }
 #endif
+#endif // defined ARDUINO_ARCH_ESP8266 || defined ARDUINO_ARCH_ESP32
