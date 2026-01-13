@@ -1924,6 +1924,10 @@ BOARDS = {
         "name": "Hornbill ESP32 Minima",
         "variant": VARIANT_ESP32,
     },
+    "huidu_hd_wf1": {
+        "name": "Huidu HD-WF1",
+        "variant": VARIANT_ESP32S2,
+    },
     "huidu_hd_wf2": {
         "name": "Huidu HD-WF2",
         "variant": VARIANT_ESP32S3,
